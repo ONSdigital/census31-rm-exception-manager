@@ -1,8 +1,10 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 CMD ["java", "-jar", "/opt/census-rm-exception-manager.jar"]
-RUN addgroup --gid 1000 exceptionmanager && \
-    adduser --system --uid 1000 exceptionmanager exceptionmanager
+# Create a system group and user without forcing UID/GID
+RUN addgroup --system exceptionmanager && \
+    adduser --system --ingroup exceptionmanager exceptionmanager
+
 USER exceptionmanager
 
 COPY target/census-rm-exception-manager*.jar /opt/census-rm-exception-manager.jar

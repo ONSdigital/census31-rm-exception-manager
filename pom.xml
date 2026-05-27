@@ -14,7 +14,8 @@
   </parent>
 
   <properties>
-    <maven.compiler.release>17</maven.compiler.release>
+    <maven.compiler.release>21</maven.compiler.release>
+    <java.version>21</java.version>
   </properties>
 
   <version>1.0-SNAPSHOT</version>
@@ -25,8 +26,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>3.21.2</version>
+        <version>3.23.0</version>
         <configuration>
+          <targetJdk>21</targetJdk>
           <excludeFromFailureFile>exclude-pmd.properties</excludeFromFailureFile>
           <failurePriority>3</failurePriority>
           <failOnViolation>true</failOnViolation>
@@ -103,15 +105,24 @@
         </executions>
         <groupId>org.springframework.boot</groupId>
       </plugin>
+      <!-- Spotless (replacement for fmt-maven-plugin) -->
       <plugin>
-        <groupId>com.coveo</groupId>
-        <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.13</version>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.43.0</version>
+        <configuration>
+          <java>
+            <googleJavaFormat>
+              <version>1.22.0</version> <!-- Java 21 compatible -->
+            </googleJavaFormat>
+          </java>
+        </configuration>
         <executions>
           <execution>
             <goals>
-              <goal>format</goal>
+              <goal>check</goal>
             </goals>
+            <phase>verify</phase>
           </execution>
         </executions>
       </plugin>
