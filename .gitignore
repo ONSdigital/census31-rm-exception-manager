@@ -6,3 +6,6 @@ target/*
 
 # Megalinter reports
 megalinter-reports/
+
+# Podman secrets
+podman-build-secret*
