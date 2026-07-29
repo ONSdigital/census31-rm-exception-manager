@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM mirror.gcr.io/library/eclipse-temurin:21-jre-alpine
 
 CMD ["java", "-jar", "/opt/census-rm-exception-manager.jar"]
 # Create a system group and user without forcing UID/GID
