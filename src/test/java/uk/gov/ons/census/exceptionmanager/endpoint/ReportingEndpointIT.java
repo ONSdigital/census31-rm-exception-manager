@@ -3,19 +3,12 @@ package uk.gov.ons.census.exceptionmanager.endpoint;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.OK;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +17,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.JsonNodeFactory;
 import uk.gov.ons.census.exceptionmanager.model.dto.AutoQuarantineRule;
 import uk.gov.ons.census.exceptionmanager.model.dto.ExceptionReport;
 import uk.gov.ons.census.exceptionmanager.model.dto.Peek;
@@ -40,12 +38,8 @@ import uk.gov.ons.census.exceptionmanager.persistence.CachingDataStore;
 public class ReportingEndpointIT {
   private static final String TEST_MESSAGE_HASH =
       "9af5350f1e61149cd0bb7dfa5efae46f224aaaffed729b220d63e0fe5a8bf4b8";
-  private static final ObjectMapper objectMapper = new ObjectMapper();
-
-  static {
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-  }
+  private static final ObjectMapper objectMapper =
+      JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
   @Autowired private CachingDataStore cachingDataStore;
   @Autowired private QuarantinedMessageRepository quarantinedMessageRepository;
@@ -118,6 +112,20 @@ public class ReportingEndpointIT {
   }
 
   @Test
+  void quarantinedMessageHeadersRoundTripThroughJsonb() {
+    QuarantinedMessage msg = new QuarantinedMessage();
+    msg.setId(UUID.randomUUID());
+    msg.setMessageHash("hash");
+    msg.setHeaders(
+        Map.of("amqp_receivedRoutingKey", JsonNodeFactory.instance.textNode("case.rh.case")));
+
+    quarantinedMessageRepository.saveAndFlush(msg);
+
+    QuarantinedMessage read = quarantinedMessageRepository.findById(msg.getId()).orElseThrow();
+    assertThat(read.getHeaders()).isEqualTo(msg.getHeaders());
+  }
+
+  @Test
   public void testReportExceptionAutoQuarantineExpiredRule() throws Exception {
     AutoQuarantineRule autoQuarantineRule = new AutoQuarantineRule();
     autoQuarantineRule.setExpression("exceptionMessage.contains('expired_rule')");
@@ -163,7 +171,7 @@ public class ReportingEndpointIT {
   public void testPeekReply() throws Exception {
     Peek peek = new Peek();
     peek.setMessageHash(TEST_MESSAGE_HASH);
-    peek.setMessagePayload("test payload".getBytes());
+    peek.setMessagePayload("test payload".getBytes(StandardCharsets.UTF_8));
 
     Map<String, String> headers = new HashMap<>();
     headers.put("accept", "application/json");
@@ -190,7 +198,7 @@ public class ReportingEndpointIT {
     skippedMessage.setRoutingKey("test routing key");
     skippedMessage.setContentType("application/xml");
     skippedMessage.setHeaders(Map.of("foo", "bar"));
-    skippedMessage.setMessagePayload("<noodle>poodle</noodle>".getBytes());
+    skippedMessage.setMessagePayload("<noodle>poodle</noodle>".getBytes(StandardCharsets.UTF_8));
     skippedMessage.setService("test service");
     skippedMessage.setSkippedTimestamp(null);
 
@@ -215,7 +223,8 @@ public class ReportingEndpointIT {
     assertThat(quarantinedMessage.getContentType()).isEqualTo(skippedMessage.getContentType());
     assertThat(quarantinedMessage.getHeaders().size())
         .isEqualTo(skippedMessage.getHeaders().size());
-    assertThat(quarantinedMessage.getHeaders().get("foo")).isEqualTo(TextNode.valueOf("bar"));
+    assertThat(quarantinedMessage.getHeaders().get("foo"))
+        .isEqualTo(JsonNodeFactory.instance.textNode("bar"));
     assertThat(quarantinedMessage.getMessagePayload())
         .isEqualTo(skippedMessage.getMessagePayload());
     assertThat(quarantinedMessage.getRoutingKey()).isEqualTo(skippedMessage.getRoutingKey());
@@ -225,7 +234,7 @@ public class ReportingEndpointIT {
   }
 
   public static HttpResponse<String> reportException(int port, String messageHash)
-      throws JsonProcessingException, UnirestException {
+      throws JacksonException, UnirestException {
     ExceptionReport exceptionReport = new ExceptionReport();
     exceptionReport.setMessageHash(messageHash);
     exceptionReport.setService("test service");

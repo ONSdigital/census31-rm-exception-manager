@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -315,11 +316,11 @@ public class CachingDataStoreTest {
     CachingDataStore underTest = new CachingDataStore(autoQuarantineRuleRepository, 0);
     Peek peek = new Peek();
     peek.setMessageHash("test message hash");
-    peek.setMessagePayload("test message".getBytes());
+    peek.setMessagePayload("test message".getBytes(StandardCharsets.UTF_8));
     underTest.storePeekMessageReply(peek);
 
     assertThat(underTest.getPeekedMessage("test message hash"))
-        .isEqualTo("test message".getBytes());
+        .isEqualTo("test message".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -376,7 +377,7 @@ public class CachingDataStoreTest {
 
     Peek peek = new Peek();
     peek.setMessageHash("test message hash");
-    peek.setMessagePayload("test message".getBytes());
+    peek.setMessagePayload("test message".getBytes(StandardCharsets.UTF_8));
     underTest.storePeekMessageReply(peek);
 
     ExceptionReport exceptionReportOne = new ExceptionReport();
