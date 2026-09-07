@@ -2,7 +2,7 @@ version: '2.1'
 services:
   postgres-exceptionmanager-it:
     container_name: postgres-exceptionmanager-it
-    image: census-rm-dev-common-postgres:latest
+    image: europe-west2-docker.pkg.dev/c31-rm-ci-prod/rm-docker-snapshot/census31-rm-dev-common-postgres:latest
     command: ["-c", "shared_buffers=256MB", "-c", "max_connections=500"]
     ports:
       - "15434:5432"
