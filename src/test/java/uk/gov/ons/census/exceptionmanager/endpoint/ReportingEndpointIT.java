@@ -116,8 +116,7 @@ public class ReportingEndpointIT {
     QuarantinedMessage msg = new QuarantinedMessage();
     msg.setId(UUID.randomUUID());
     msg.setMessageHash("hash");
-    msg.setHeaders(
-        Map.of("amqp_receivedRoutingKey", JsonNodeFactory.instance.textNode("case.rh.case")));
+    msg.setHeaders(Map.of("messageKey", JsonNodeFactory.instance.textNode("case.rh.case")));
 
     quarantinedMessageRepository.saveAndFlush(msg);
 
@@ -195,7 +194,7 @@ public class ReportingEndpointIT {
     SkippedMessage skippedMessage = new SkippedMessage();
     skippedMessage.setMessageHash(TEST_MESSAGE_HASH);
     skippedMessage.setSubscription("test subscription");
-    skippedMessage.setRoutingKey("test routing key");
+    skippedMessage.setRoutingKey("test message key");
     skippedMessage.setContentType("application/xml");
     skippedMessage.setHeaders(Map.of("foo", "bar"));
     skippedMessage.setMessagePayload("<noodle>poodle</noodle>".getBytes(StandardCharsets.UTF_8));
