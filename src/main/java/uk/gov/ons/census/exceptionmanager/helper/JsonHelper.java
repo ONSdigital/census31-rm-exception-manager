@@ -1,24 +1,20 @@
 package uk.gov.ons.census.exceptionmanager.helper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JsonHelper {
-  private static final ObjectMapper objectMapper;
+  private static final ObjectMapper objectMapper =
+      JsonMapper.builder().disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
-  static {
-    objectMapper =
-        new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-  }
+  private JsonHelper() {}
 
   public static String convertObjectToJson(Object obj) {
     try {
       return objectMapper.writeValueAsString(obj);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new RuntimeException("Failed converting Object To Json", e);
     }
   }

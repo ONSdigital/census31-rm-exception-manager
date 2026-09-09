@@ -1,6 +1,7 @@
 package uk.gov.ons.census.exceptionmanager.endpoint;
 
 import jakarta.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
@@ -128,7 +129,7 @@ public class AdminEndpoint {
     if (message == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     } else {
-      return ResponseEntity.status(HttpStatus.OK).body(new String(message));
+      return ResponseEntity.status(HttpStatus.OK).body(new String(message, StandardCharsets.UTF_8));
     }
   }
 

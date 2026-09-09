@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -139,7 +140,7 @@ public class AdminEndpointTest {
     // Given
     String testMessageHash = "test message hash";
     CachingDataStore cachingDataStore = mock(CachingDataStore.class);
-    byte[] testPeekedMessageBody = "test message body".getBytes();
+    byte[] testPeekedMessageBody = "test message body".getBytes(StandardCharsets.UTF_8);
     when(cachingDataStore.getPeekedMessage(anyString()))
         .thenReturn(null)
         .thenReturn(null)
@@ -163,7 +164,8 @@ public class AdminEndpointTest {
     ResponseEntity<String> actualResponse = underTest.peekMessage(testMessageHash);
 
     // Then
-    assertThat(actualResponse.getBody()).isEqualTo(new String(testPeekedMessageBody));
+    assertThat(actualResponse.getBody())
+        .isEqualTo(new String(testPeekedMessageBody, StandardCharsets.UTF_8));
     verify(cachingDataStore).peekMessage(eq(testMessageHash));
   }
 

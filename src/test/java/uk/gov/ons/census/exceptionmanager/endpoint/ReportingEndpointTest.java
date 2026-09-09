@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -65,10 +66,10 @@ public class ReportingEndpointTest {
     SkippedMessage skippedMessage = new SkippedMessage();
     skippedMessage.setMessageHash("test message hash");
     skippedMessage.setSubscription("test subscription");
-    skippedMessage.setRoutingKey("test routing key");
+    skippedMessage.setRoutingKey("test message key");
     skippedMessage.setContentType("application/xml");
     skippedMessage.setHeaders(Map.of("foo", "bar"));
-    skippedMessage.setMessagePayload("<noodle>poodle</noodle>".getBytes());
+    skippedMessage.setMessagePayload("<noodle>poodle</noodle>".getBytes(StandardCharsets.UTF_8));
     skippedMessage.setService("test service");
 
     underTest.storeSkippedMessage(skippedMessage);
