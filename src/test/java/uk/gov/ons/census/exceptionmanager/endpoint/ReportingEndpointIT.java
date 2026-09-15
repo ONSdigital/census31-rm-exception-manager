@@ -59,6 +59,8 @@ public class ReportingEndpointIT {
     HttpResponse<String> response = reportException(port, TEST_MESSAGE_HASH);
 
     assertThat(response.getStatus()).isEqualTo(OK.value());
+    assertThat(response.getBody())
+        .isEqualTo("{\"peek\":false,\"logIt\":true,\"skipIt\":false,\"throwAway\":false}");
 
     Response actualResponse = objectMapper.readValue(response.getBody(), Response.class);
     assertThat(actualResponse.isSkipIt()).isFalse();
@@ -101,6 +103,8 @@ public class ReportingEndpointIT {
             .asString();
 
     assertThat(response.getStatus()).isEqualTo(OK.value());
+    assertThat(response.getBody())
+        .isEqualTo("{\"peek\":false,\"logIt\":true,\"skipIt\":true,\"throwAway\":false}");
 
     Response actualResponse = objectMapper.readValue(response.getBody(), Response.class);
     assertThat(actualResponse.isSkipIt()).isTrue();
@@ -156,6 +160,8 @@ public class ReportingEndpointIT {
             .asString();
 
     assertThat(response.getStatus()).isEqualTo(OK.value());
+    assertThat(response.getBody())
+        .isEqualTo("{\"peek\":false,\"logIt\":true,\"skipIt\":false,\"throwAway\":false}");
 
     Response actualResponse = objectMapper.readValue(response.getBody(), Response.class);
     assertThat(actualResponse.isSkipIt()).isFalse();
