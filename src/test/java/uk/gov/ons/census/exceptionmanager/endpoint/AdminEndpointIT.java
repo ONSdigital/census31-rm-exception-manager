@@ -3,7 +3,6 @@ package uk.gov.ons.census.exceptionmanager.endpoint;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.OK;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import java.util.*;
@@ -16,6 +15,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.ons.census.exceptionmanager.model.repository.QuarantinedMessageRepository;
 import uk.gov.ons.census.exceptionmanager.persistence.CachingDataStore;
 
